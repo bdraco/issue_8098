@@ -27,7 +27,7 @@ code += """
     return stmt
 """
 
-_create_db()
+_create_db(THREADS)
 
 
 class Runner(threading.Thread):
@@ -37,22 +37,13 @@ class Runner(threading.Thread):
         super().__init__()
 
     def run(self):
-        e = create_engine(DB_PATH, echo=True)
-        session = sessionmaker(e)()
         stmt = self.module.generate_lambda_stmt(self.wanted)
-        row = session.execute(stmt).first()
-        if not row:
-            print(f"Failed on thread {self.wanted}")
-            time.sleep(1000)
-        else:
-            print(f"Success on thread {self.wanted}")
-        session.close()
-        e.dispose()
 
 
 compiled = compile(code, "onetime.py", "exec")
 module = ModuleType("lambda_fake")
 exec(compiled, module.__dict__)
+
 threads = []
 for num in range(THREADS):
     threads.append(Runner(module, str(num + 1)))
@@ -60,3 +51,14 @@ for thread in threads:
     thread.start()
 for thread in threads:
     thread.join()
+
+stmt = module.generate_lambda_stmt(5)
+
+e = create_engine(DB_PATH, echo=True)
+with e.connect() as conn:
+    row = conn.execute(stmt).first()
+
+if not row:
+    print(f"Failed on thread {5}")
+else:
+    print(f"Success on thread {5}")
