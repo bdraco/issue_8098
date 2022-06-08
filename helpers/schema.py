@@ -24,10 +24,7 @@ def _create_db():
     session = sessionmaker(e)()
     session.add_all(
         [
-            A(col1="1", col2="1", col3="1", col4="1"),
-            A(col1="2", col2="2", col3="2", col4="2"),
-            A(col1="3", col2="3", col3="3", col4="3"),
-            A(col1="4", col2="4", col3="4", col4="4"),
+          [A(col1=str(i), col2=str(i), col3=str(i), col4=str(i)) for i in range(500)]
         ]
     )
     session.commit()
