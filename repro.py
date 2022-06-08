@@ -6,7 +6,7 @@ from helpers.schema import DB_PATH, _create_db
 import time
 
 THREADS = 4
-NUM_OF_LAMBDAS = 90  # Increase this number if your system is fast
+NUM_OF_LAMBDAS = 180  # Increase this number if your system is fast
 
 
 code = """
@@ -29,34 +29,34 @@ code += """
 
 _create_db()
 
-for _ in range(10000):
 
-    class Runner(threading.Thread):
-        def __init__(self, module, wanted) -> None:
-            self.module = module
-            self.wanted = wanted
-            super().__init__()
+class Runner(threading.Thread):
+    def __init__(self, module, wanted) -> None:
+        self.module = module
+        self.wanted = wanted
+        super().__init__()
 
-        def run(self):
-            e = create_engine(DB_PATH, echo=True)
-            session = sessionmaker(e)()
-            stmt = self.module.generate_lambda_stmt(self.wanted)
-            row = session.execute(stmt).first()
-            if not row:
-                print(f"Failed on thread {self.wanted}")
-                time.sleep(1000)
-            else:
-                print(f"Success on thread {self.wanted}")
-            session.close()
-            e.dispose()
+    def run(self):
+        e = create_engine(DB_PATH, echo=True)
+        session = sessionmaker(e)()
+        stmt = self.module.generate_lambda_stmt(self.wanted)
+        row = session.execute(stmt).first()
+        if not row:
+            print(f"Failed on thread {self.wanted}")
+            time.sleep(1000)
+        else:
+            print(f"Success on thread {self.wanted}")
+        session.close()
+        e.dispose()
 
-    compiled = compile(code, "onetime.py", "exec")
-    module = ModuleType("lambda_fake")
-    exec(compiled, module.__dict__)
-    threads = []
-    for num in range(THREADS):
-        threads.append(Runner(module, str(num + 1)))
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
+
+compiled = compile(code, "onetime.py", "exec")
+module = ModuleType("lambda_fake")
+exec(compiled, module.__dict__)
+threads = []
+for num in range(THREADS):
+    threads.append(Runner(module, str(num + 1)))
+for thread in threads:
+    thread.start()
+for thread in threads:
+    thread.join()
