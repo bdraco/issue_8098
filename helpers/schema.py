@@ -23,9 +23,7 @@ def _create_db():
     Base.metadata.create_all(e)
     session = sessionmaker(e)()
     session.add_all(
-        [
-            [A(col1=str(i), col2=str(i), col3=str(i), col4=str(i)) for i in range(500)]
-        ]
+        [A(col1=str(i), col2=str(i), col3=str(i), col4=str(i)) for i in range(500)]
     )
     session.commit()
     session.close()
