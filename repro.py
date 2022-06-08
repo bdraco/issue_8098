@@ -37,7 +37,7 @@ class Runner(threading.Thread):
         super().__init__()
 
     def run(self):
-        stmt = self.module.generate_lambda_stmt(self.wanted)
+        self.module.generate_lambda_stmt(self.wanted)
 
 
 compiled = compile(code, "onetime.py", "exec")
