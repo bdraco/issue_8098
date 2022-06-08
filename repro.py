@@ -1,5 +1,8 @@
 from sqlalchemy import *
 from sqlalchemy.orm import *
+from sqlalchemy.sql.lambdas import StatementLambdaElement
+from sqlalchemy.sql.traversals import CacheKey
+import sys
 import threading
 from types import ModuleType
 from helpers.schema import DB_PATH, _create_db
@@ -35,6 +38,7 @@ class Runner(threading.Thread):
         self.module = module
         self.wanted = wanted
         super().__init__()
+        self.name = f"thread{wanted}"
 
     def run(self):
         self.module.generate_lambda_stmt(self.wanted)
@@ -52,7 +56,7 @@ for thread in threads:
 for thread in threads:
     thread.join()
 
-stmt = module.generate_lambda_stmt(5)
+stmt: StatementLambdaElement = module.generate_lambda_stmt(5)
 
 e = create_engine(DB_PATH, echo=True)
 with e.connect() as conn:
@@ -60,5 +64,6 @@ with e.connect() as conn:
 
 if not row:
     print(f"Failed on thread {5}")
-else:
-    print(f"Success on thread {5}")
+    sys.exit(1)
+
+print(f"Success on thread {5}")
