@@ -21,7 +21,7 @@ def generate_lambda_stmt(wanted):
 """
 
 for _ in range(NUM_OF_LAMBDAS):
-    code += "    stmt += lambda s: s.where((A.col1 == wanted) & (A.col2 == wanted) & (A.col2 == wanted) & (A.col2 == wanted))\n"
+    code += "    stmt += lambda s: s.where((A.col1 == wanted) & (A.col2 == wanted) & (A.col3 == wanted) & (A.col4 == wanted))\n"
 
 code += """
     return stmt
