@@ -38,7 +38,9 @@ class Runner(threading.Thread):
         super().__init__()
 
     def run(self):
-        e = create_engine(DB_PATH, echo=True, logging_name=f"Thread {self.wanted}")
+        e = create_engine(
+            DB_PATH, echo=True, logging_name=f"Thread {self.wanted}", query_cache_size=0
+        )
         session = sessionmaker(e)()
         stmt = generate_stmt(self.wanted)
         row = session.execute(stmt).first()

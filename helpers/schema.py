@@ -3,6 +3,7 @@ from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import declarative_base
 import threading
 from types import ModuleType
+from sqlalchemy import create_engine, event as sqlalchemy_event
 
 DB_PATH = "sqlite:///./any.db"
 
@@ -20,6 +21,13 @@ class A(Base):
 
 def _create_db():
     e = create_engine(DB_PATH, echo=True)
+
+    def setup_recorder_connection(dbapi_connection, connection_record) -> None:
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL;")
+        cursor.close()
+
+    sqlalchemy_event.listen(e, "connect", setup_recorder_connection)
     Base.metadata.create_all(e)
     session = sessionmaker(e)()
     session.add_all(
