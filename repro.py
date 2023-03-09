@@ -5,7 +5,12 @@ from types import ModuleType
 from helpers.schema import DB_PATH, _create_db
 import time
 
-THREADS = 4
+from sqlalchemy.sql import lambdas
+from sqlalchemy import util
+
+lambdas._closure_per_cache_key = util.LRUCache(1)
+
+THREADS = 8
 NUM_OF_LAMBDAS = 180  # Increase this number if your system is fast
 
 
@@ -21,7 +26,10 @@ def generate_lambda_stmt(wanted):
 """
 
 for _ in range(NUM_OF_LAMBDAS):
-    code += "    stmt += lambda s: s.where((A.col1 == wanted) & (A.col2 == wanted) & (A.col2 == wanted) & (A.col2 == wanted))\n"
+    code += "    stmt += lambda s: s.where((A.col1 == wanted))\n"
+    code += "    stmt += lambda s: s.where((A.col2 == wanted))\n"
+    code += "    stmt += lambda s: s.where((A.col3 == wanted))\n"
+    code += "    stmt += lambda s: s.where((A.col4 == wanted))\n"
 
 code += """
     return stmt
@@ -41,7 +49,7 @@ class Runner(threading.Thread):
         session = sessionmaker(e)()
         stmt = self.module.generate_lambda_stmt(self.wanted)
         row = session.execute(stmt).first()
-        if not row:
+        if not row or [val for val in row if val != self.wanted]:
             print(f"Failed on thread {self.wanted}")
             time.sleep(1000)
         else:
