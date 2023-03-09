@@ -10,7 +10,7 @@ from sqlalchemy import util
 
 lambdas._closure_per_cache_key = util.LRUCache(1)
 
-THREADS = 8
+THREADS = 4
 NUM_OF_LAMBDAS = 180  # Increase this number if your system is fast
 
 
